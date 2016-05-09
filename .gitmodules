@@ -1,4 +1,4 @@
 [submodule "vendor/libgit2"]
 	path = vendor/libgit2
+	url = https://github.com/Axosoft/libgit2.git
 [submodule "vendor/libgit2"]
-	url = https://github.com/nodegit/libgit2.git
