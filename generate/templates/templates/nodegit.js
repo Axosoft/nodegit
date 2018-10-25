@@ -1,11 +1,29 @@
+var cp = require("child_process");
 var _ = require("lodash");
 var promisify = require("promisify-node");
 var rawApi;
 
+
+var nativeModuleName;
+if (process.platform !== "linux") {
+  nativeModuleName = "nodegit.node";
+} else {
+  var stdout = cp.execSync("cat /etc/os-release").toString();
+  if (/^ID=fedora$/m.test(stdout) && /^VERSION="28/m.test(stdout)) {
+    nativeModuleName = "nodegit-fedora-28.node";
+  } else if (/^ID=centos$/m.test(stdout)) {
+    nativeModuleName = "nodegit-centos-7.node";
+  } else if (/^ID=ubuntu$/m.test(stdout) && /^VERSION="18\.04/m.test(stdout)) {
+    nativeModuleName = "nodegit-ubuntu-18.node";
+  } else {
+    nativeModuleName = "nodegit.node";
+  }
+}
+
 // Attempt to load the production release first, if it fails fall back to the
 // debug release.
 try {
-  rawApi = require("../build/Release/nodegit.node");
+  rawApi = require(`../build/Release/${nativeModuleName}`);
 }
 catch (ex) {
   /* istanbul ignore next */
@@ -13,7 +31,7 @@ catch (ex) {
     throw ex;
   }
 
-  rawApi = require("../build/Debug/nodegit.node");
+  rawApi = require(`../build/Debug/${nativeModuleName}`);
 }
 
 // For disccussion on why `cloneDeep` is required, see:
