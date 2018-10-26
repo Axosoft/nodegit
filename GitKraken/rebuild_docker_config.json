@@ -1,0 +1,5 @@
+{
+  "ubuntu-18": "docker.axosoft.com/rebuild-nodegit:ubuntu-18",
+  "centos-7": "docker.axosoft.com/rebuild-nodegit:centos-7",
+  "fedora-28": "docker.axosoft.com/rebuild-nodegit:fedora-28"
+}

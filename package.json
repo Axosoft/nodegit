@@ -1,5 +1,5 @@
 {
-  "name": "nodegit",
+  "name": "@axosoft/nodegit",
   "description": "Node.js libgit2 asynchronous native bindings",
   "version": "0.23.0",
   "homepage": "http://nodegit.org",
