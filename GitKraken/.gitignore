@@ -1,0 +1,4 @@
+/node_modules/
+
+# Binary files for rebuilds
+/additional-binaries/
