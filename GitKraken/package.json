@@ -1,0 +1,12 @@
+{
+  "name": "nodegit-gk",
+  "version": "1.0.0",
+  "description": "",
+  "dependencies": {
+    "executive": "^1.6.3",
+    "request": "^2.88.0"
+  },
+  "gitkrakenPrebuilts": {
+    "bucketName": "axonodegit-gk"
+  }
+}
