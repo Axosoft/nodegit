@@ -1,0 +1,62 @@
+#!groovy
+
+if (!env.GK_ELECTRON_TARGET) {
+  error 'No electron target specified!'
+}
+
+def runWithNvm = {
+  command ->
+    sh "#!/usr/bin/env bash\n" +
+       "set -e\n" +
+       ". ~/.nvm/nvm.sh\n" +
+       command
+}
+
+try {
+  node("gk-ubuntu16") {
+    stage("Checking out") {
+      try {
+        sh "git clean -qxdff" // needs to run before deleteDir
+      } catch (err) {/* if this isn't a repo yet, we shouldn't fail */}
+      deleteDir()
+      checkout scm
+    }
+
+    stage("NPM install") {
+      sh 'echo \'' +
+          'runtime = electron\n' +
+          "target = \"$GK_ELECTRON_TARGET\"\n" +
+          'target_arch = "x64"\n' +
+          'disturl="https://electronjs.org/headers"' +
+          '\' > .npmrc'
+      sh 'cat .npmrc'
+
+      runWithNvm "npm install"
+      dir("GitKraken") {
+        runWithNvm "npm install"
+      }
+    }
+
+    stage("Build binaries with Docker") {
+      dir("GitKraken") {
+        runWithNvm "npm run rebuildInDocker"
+      }
+    }
+
+    stage("Push binaries to S3") {
+      withCredentials([[
+        $class: "AmazonWebServicesCredentialsBinding",
+        credentialsId: "gknodegit",
+        accessKeyVariable: "AWS_ACCESS_KEY_ID",
+        secretKeyVariable: "AWS_SECRET_ACCESS_KEY"
+      ]]) {
+        dir("GitKraken") {
+          runWithNvm "node pushToS3.js"
+        }
+      }
+    }
+  }
+}
+catch (err) {
+  throw err
+}
