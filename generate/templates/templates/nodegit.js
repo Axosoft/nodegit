@@ -1,3 +1,4 @@
+var cp = require("child_process");
 var _ = require("lodash");
 var util = require("util");
 var worker;
@@ -8,18 +9,68 @@ try {
 
 var rawApi;
 
-// Attempt to load the production release first, if it fails fall back to the
-// debug release.
-try {
-  rawApi = require("../build/Release/nodegit.node");
-}
-catch (ex) {
-  /* istanbul ignore next */
-  if (ex.code !== "MODULE_NOT_FOUND") {
-    throw ex;
+// Declare a preferred load order for built nodegit.node targets
+// The OS informs this choice.
+// On Windows and MacOS, default to whatever was built.
+// On Linux, we have selected the order based on the most likely OpenSSL distribution you have installed.
+// Fedora 28 =>   OpenSSL 1.1.0
+// Centos 7 =>    OpenSSL 1.0.2
+// Ubuntu 18 =>   OpenSSL 1.1.0
+// Ubuntu 16 =>   OpenSSL 1.0.1
+// Other =>       OpenSSL 1.0.0
+var nativeModuleLoadOrder;
+if (process.platform !== "linux") {
+  nativeModuleLoadOrder = [
+    "nodegit.node"
+  ];
+} else {
+  var stdout = cp.execSync("cat /etc/os-release").toString();
+  if (/^ID=fedora$/m.test(stdout)) {
+    nativeModuleLoadOrder = [
+      "nodegit-fedora-28.node",
+      "nodegit-centos-7.node",
+      "nodegit-ubuntu-18.node",
+      "nodegit.node",
+      "nodegit-debian-8.node"
+    ];
+  } else if (/^ID=centos$/m.test(stdout)) {
+    nativeModuleLoadOrder = [
+      "nodegit-fedora-28.node",
+      "nodegit-centos-7.node",
+      "nodegit-ubuntu-18.node",
+      "nodegit.node",
+      "nodegit-debian-8.node"
+    ];
+  } else if (/^ID=ubuntu$/m.test(stdout)) {
+    nativeModuleLoadOrder = [
+      "nodegit-ubuntu-18.node",
+      "nodegit.node",
+      "nodegit-debian-8.node"
+    ]
+  } else {
+    nativeModuleLoadOrder = [
+      "nodegit-fedora-28.node",
+      "nodegit-centos-7.node",
+      "nodegit-ubuntu-18.node",
+      "nodegit.node",
+      "nodegit-debian-8.node"
+    ];
   }
+}
 
-  rawApi = require("../build/Debug/nodegit.node");
+// Attempt to load the production release first, using the load order determined
+for (var nativeModuleName of nativeModuleLoadOrder) {
+  try {
+    rawApi = require(`../build/Release/${nativeModuleName}`);
+    break;
+  }
+  catch (ex) {
+    // do nothing
+  }
+}
+
+if (!rawApi) {
+  rawApi = require("build/Debug/nodegit.node");
 }
 
 var promisify = fn => fn && util.promisify(fn); // jshint ignore:line
