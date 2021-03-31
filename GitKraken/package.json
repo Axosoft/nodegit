@@ -1,0 +1,15 @@
+{
+  "name": "nodegit-gk",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "rebuildInDocker": "node rebuildInDocker.js"
+  },
+  "dependencies": {
+    "executive": "^1.6.3",
+    "got": "^10.7.0"
+  },
+  "gitkrakenPrebuilts": {
+    "bucketName": "axonodegit-gk"
+  }
+}
