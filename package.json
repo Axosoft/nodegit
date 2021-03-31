@@ -1,7 +1,8 @@
 {
-  "name": "nodegit",
+  "name": "@axosoft/nodegit",
   "description": "Node.js libgit2 asynchronous native bindings",
   "version": "0.28.0-alpha.3",
+  "nodegitVersion": "0.28.0-alpha.3",
   "homepage": "http://nodegit.org",
   "keywords": [
     "libgit2",
@@ -64,6 +65,7 @@
     "walk": "^2.3.9"
   },
   "binary": {
+    "package_name": "{module_name}-v0.28.0-alpha.3-{node_abi}-{platform}-{arch}.tar.gz",
     "module_name": "nodegit",
     "module_path": "./build/Release/",
     "host": "https://axonodegit.s3.amazonaws.com/nodegit/nodegit/"
