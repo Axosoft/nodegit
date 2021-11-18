@@ -1,11 +1,11 @@
 const aws = require('aws-sdk');
 const fs = require("fs");
-const fp = require("lodash/fp");
 const path = require("path");
 
 const { gitkrakenPrebuilts: { bucketName } } = require('./package.json');
 const { version } = require("../package.json");
 const rebuildConfig = require("./rebuild_docker_config.json");
+const { getDistNames } = require("./configHelper");
 
 const binaryDir = path.resolve(__dirname, "additional-binaries");
 
@@ -22,7 +22,8 @@ const uploadBinaryToS3 = binaryName =>
   }).promise();
 
 const uploadAllBinaries = async () => {
-  for (const [distName] of fp.entries(rebuildConfig)) {
+  const distNames = getDistNames(rebuildConfig);
+  for (const distName of distNames) {
     const binaryName = getBinaryName(distName, version);
     await uploadBinaryToS3(binaryName);
   }
