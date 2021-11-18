@@ -1,0 +1,9 @@
+{
+  "ubuntu-20": {
+    "image": "953684725979.dkr.ecr.us-east-1.amazonaws.com/rebuild-nodegit:d4e633a"
+  },
+  "ubuntu-20-ssl-static": {
+    "image": "953684725979.dkr.ecr.us-east-1.amazonaws.com/rebuild-nodegit:d4e633a",
+    "env": "-e NODEGIT_OPENSSL_STATIC_LINK=1"
+  }
+}

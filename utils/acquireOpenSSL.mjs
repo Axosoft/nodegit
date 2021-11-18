@@ -148,6 +148,13 @@ const buildDarwin = async (buildCwd, macOsDeploymentTarget) => {
 };
 
 const buildLinux = async (buildCwd) => {
+  // We don't want our build system to override these for OpenSSL, otherwise
+  // we get errors about undefined hidden symbols
+  const envVarsToDelete = ['CC', 'CXX', 'CPPFLAGS', 'CXXFLAGS', 'LDFLAGS'];
+  for (const envVarToDelete of envVarsToDelete) {
+    delete process.env[envVarToDelete];
+  }
+  
   const buildConfig = targetArch === "x64" ? "linux-x86_64" : "linux-aarch64";
 
   const configureArgs = [
