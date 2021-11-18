@@ -25,9 +25,13 @@ module.exports = function retrieveExternalDependencies() {
       newEnv[key] = process.env[key];
     });
 
-    let cpArgs = process.env.NODEGIT_OPENSSL_STATIC_LINK === '1'
-      ? ` --with-libssl-prefix=${opensslVendorDirectory}`
-      : '';
+    let cpArgs = '';
+    if (process.env.NODEGIT_OPENSSL_STATIC_LINK === '1') {
+      cpArgs = ` --with-libssl-prefix=${opensslVendorDirectory}`;
+    } else if (process.env.openssl_version && process.env.use_custom_openssl) {
+      cpArgs = ` --with-libssl-prefix=/build-openssl/openssl-bin-${process.env.openssl_version}`
+    }
+
     cp.exec(
       `${libssh2ConfigureScript}${cpArgs}`,
       {
