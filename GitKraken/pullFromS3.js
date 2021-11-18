@@ -1,12 +1,12 @@
 const fs = require("fs");
 const fse = require("fs-extra");
-const fp = require("lodash/fp");
 const path = require("path");
 const got = require("got");
 
 const { gitkrakenPrebuilts: { bucketName } } = require('./package.json');
 const { version } = require("../package.json");
 const rebuildConfig = require("./rebuild_docker_config.json");
+const { getDistNames } = require("./configHelper");
 
 const binaryDir = path.resolve(__dirname, "additional-binaries");
 const buildReleaseDir = path.resolve(__dirname, "..", "build", "Release");
@@ -23,14 +23,16 @@ const downloadBinaryFromS3 = binaryName => new Promise((resolve, reject) => {
 });
 
 const downloadAllBinaries = async () => {
-  for (const [distName] of fp.entries(rebuildConfig)) {
+  const distNames = getDistNames(rebuildConfig);
+  for (const distName of distNames) {
     const binaryName = getBinaryName(distName, version);
     await downloadBinaryFromS3(binaryName);
   }
 };
 
 const copyBinaries = async () => {
-  for (const [distName] of fp.entries(rebuildConfig)) {
+  const distNames = getDistNames(rebuildConfig);
+  for (const distName of distNames) {
     const binaryName = getBinaryName(distName, version);
     const friendlyBinaryName = getFriendlyBinaryName(distName);
 
