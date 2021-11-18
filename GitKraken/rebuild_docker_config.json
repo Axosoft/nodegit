@@ -1,6 +1,9 @@
 {
-  "debian-8": "docker.axosoft.com/rebuild-nodegit:debian-8",
-  "ubuntu-18": "docker.axosoft.com/rebuild-nodegit:ubuntu-18",
-  "centos-7": "docker.axosoft.com/rebuild-nodegit:centos-7",
-  "fedora-28": "docker.axosoft.com/rebuild-nodegit:fedora-28"
+  "ubuntu-18": {
+    "image": "docker.axosoft.com/rebuild-nodegit:ubuntu-18"
+  },
+  "ubuntu-18-ssl-1.0.0": {
+    "image": "docker.axosoft.com/rebuild-nodegit:ubuntu-18-ssl-1.0.0",
+    "patchedDistName": "ubuntu-18-ssl-10"
+  }
 }
