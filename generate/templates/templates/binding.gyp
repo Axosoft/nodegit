@@ -173,7 +173,7 @@
         }],
         ["OS=='linux' or OS.endswith('bsd') or <(is_IBMi) == 1", {
           "cflags": [
-            "-std=c++14"
+            "-std=c++11"
           ],
           "conditions": [
             ["<(is_electron) == 1 and <(electron_openssl_static) == 1", {
