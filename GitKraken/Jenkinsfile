@@ -31,7 +31,6 @@ try {
           '\' > .npmrc'
       sh 'cat .npmrc'
 
-      runWithNvm "npm install"
       dir("GitKraken") {
         runWithNvm "npm install"
       }

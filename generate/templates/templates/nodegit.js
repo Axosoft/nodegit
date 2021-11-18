@@ -27,33 +27,31 @@ if (process.platform !== "linux") {
   var stdout = cp.execSync("cat /etc/os-release").toString();
   if (/^ID=fedora$/m.test(stdout)) {
     nativeModuleLoadOrder = [
-      "nodegit-fedora-28.node",
-      "nodegit-centos-7.node",
       "nodegit-ubuntu-18.node",
-      "nodegit.node",
-      "nodegit-debian-8.node"
+      "nodegit-ubuntu-18-ssl-10.node",
+      "nodegit-ubuntu-18-ssl-1.0.0.node",
+      "nodegit.node"
     ];
   } else if (/^ID=centos$/m.test(stdout)) {
     nativeModuleLoadOrder = [
-      "nodegit-fedora-28.node",
-      "nodegit-centos-7.node",
       "nodegit-ubuntu-18.node",
-      "nodegit.node",
-      "nodegit-debian-8.node"
+      "nodegit-ubuntu-18-ssl-10.node",
+      "nodegit-ubuntu-18-ssl-1.0.0.node",
+      "nodegit.node"
     ];
   } else if (/^ID=ubuntu$/m.test(stdout)) {
     nativeModuleLoadOrder = [
       "nodegit-ubuntu-18.node",
-      "nodegit.node",
-      "nodegit-debian-8.node"
+      "nodegit-ubuntu-18-ssl-1.0.0.node",
+      "nodegit-ubuntu-18-ssl-10.node",
+      "nodegit.node"
     ]
   } else {
     nativeModuleLoadOrder = [
-      "nodegit-fedora-28.node",
-      "nodegit-centos-7.node",
       "nodegit-ubuntu-18.node",
-      "nodegit.node",
-      "nodegit-debian-8.node"
+      "nodegit-ubuntu-18-ssl-1.0.0.node",
+      "nodegit-ubuntu-18-ssl-10.node",
+      "nodegit.node"
     ];
   }
 }
