@@ -91,5 +91,8 @@ const rebuildInDocker = async () => {
 module.exports = rebuildInDocker;
 
 if (require.main === module) {
-  module.exports();
+  module.exports().catch((error) => {
+    console.error('Rebuild in docker failed: ', error);
+    process.exit(1);
+  });
 }
