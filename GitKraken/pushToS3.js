@@ -32,5 +32,8 @@ const uploadAllBinaries = async () => {
 module.exports = uploadAllBinaries;
 
 if (require.main === module) {
-  module.exports();
+  module.exports().catch((error) => {
+    console.error('Push to S3 failed: ', error);
+    process.exit(1);
+  });
 }
