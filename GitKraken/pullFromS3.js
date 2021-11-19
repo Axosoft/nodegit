@@ -58,5 +58,8 @@ const acquireBinariesFromS3 = async () => {
 module.exports = acquireBinariesFromS3;
 
 if (require.main === module) {
-  module.exports();
+  module.exports().catch((error) => {
+    console.error('Pull from S3 failed: ', error);
+    process.exit(1);
+  });
 }
