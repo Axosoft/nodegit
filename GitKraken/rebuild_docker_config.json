@@ -5,5 +5,8 @@
   "ubuntu-18-ssl-1.0.0": {
     "image": "docker.axosoft.com/rebuild-nodegit:ubuntu-18-ssl-1.0.0",
     "patchedDistName": "ubuntu-18-ssl-10"
+  },
+  "ubuntu-18-ssl-1.1.0": {
+    "image": "docker.axosoft.com/rebuild-nodegit:ubuntu-18-ssl-1.1.0"
   }
 }
