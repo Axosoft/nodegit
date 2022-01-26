@@ -49,7 +49,9 @@ const buildWithDockerImage = async (distName, dockerImage, patchedDistName, conf
 
 const buildAllImages = async () => {
   for (const [distName, { image: dockerImage, patchedDistName, env }] of fp.entries(rebuildConfig)) {
+    console.log(`Building ${distName}/${dockerImage}...`);
     await buildWithDockerImage(distName, dockerImage, patchedDistName, env);
+    console.log('Done.');
   }
 }
 
