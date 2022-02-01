@@ -13,11 +13,10 @@ var rawApi;
 // The OS informs this choice.
 // On Windows and MacOS, default to whatever was built.
 // On Linux, we have selected the order based on the most likely OpenSSL distribution you have installed.
-// Fedora 28 =>   OpenSSL 1.1.0
+// Fedora 34 =>   OpenSSL 1.1.1
 // Centos 7 =>    OpenSSL 1.0.2
-// Ubuntu 18 =>   OpenSSL 1.1.0
-// Ubuntu 16 =>   OpenSSL 1.0.1
-// Other =>       OpenSSL 1.0.0
+// Ubuntu 18 =>   OpenSSL 1.1.0-1.1.1
+// Debian 9 =>   OpenSSL 1.1.0
 var nativeModuleLoadOrder;
 if (process.platform !== "linux") {
   nativeModuleLoadOrder = [
@@ -35,28 +34,45 @@ if (process.platform !== "linux") {
     ];
   } else if (/^ID=centos$/m.test(stdout)) {
     nativeModuleLoadOrder = [
+      "nodegit-debian-9.node",
       "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-10.node",
-      "nodegit-debian-9.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
       "nodegit.node"
     ];
   } else if (/^ID=ubuntu$/m.test(stdout)) {
     nativeModuleLoadOrder = [
-      "nodegit-ubuntu-18.node",
       "nodegit-debian-9.node",
+      "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
       "nodegit-ubuntu-18-ssl-10.node",
       "nodegit.node"
     ]
   } else {
     nativeModuleLoadOrder = [
-      "nodegit-ubuntu-18.node",
       "nodegit-debian-9.node",
+      "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
       "nodegit-ubuntu-18-ssl-10.node",
       "nodegit.node"
     ];
+  }
+
+  if (process.env.GITKRAKEN_NODEGIT_OPENSSL_LOAD_ORDER) {
+    const loadOrderOverrideArr = process.env.GITKRAKEN_NODEGIT_OPENSSL_LOAD_ORDER.split(',');
+
+    const loadOrderOverride = [];
+    for (const override of loadOrderOverrideArr) {
+      if (!nativeModuleLoadOrder.includes(override)) {
+        console.log(`Not overriding ${override}, unknown module`);
+        continue;
+      }
+
+      loadOrderOverride.push(override);
+    }
+
+    nativeModuleLoadOrder = loadOrderOverride;
+    console.log(`Overriding load order to ${nativeModuleLoadOrder}`);
   }
 }
 
