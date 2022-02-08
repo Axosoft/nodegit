@@ -27,14 +27,14 @@ if (process.platform !== "linux") {
   if (/^ID=fedora$/m.test(stdout)) {
     nativeModuleLoadOrder = [
       "nodegit-ubuntu-18.node",
-      "nodegit-debian-9.node",
+      "nodegit-ubuntu-18-ssl-1.1.0.node",
       "nodegit-ubuntu-18-ssl-10.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
       "nodegit.node"
     ];
   } else if (/^ID=centos$/m.test(stdout)) {
     nativeModuleLoadOrder = [
-      "nodegit-debian-9.node",
+      "nodegit-ubuntu-18-ssl-1.1.0.node",
       "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-10.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
@@ -42,7 +42,7 @@ if (process.platform !== "linux") {
     ];
   } else if (/^ID=ubuntu$/m.test(stdout)) {
     nativeModuleLoadOrder = [
-      "nodegit-debian-9.node",
+      "nodegit-ubuntu-18-ssl-1.1.0.node",
       "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
       "nodegit-ubuntu-18-ssl-10.node",
@@ -50,7 +50,7 @@ if (process.platform !== "linux") {
     ]
   } else {
     nativeModuleLoadOrder = [
-      "nodegit-debian-9.node",
+      "nodegit-ubuntu-18-ssl-1.1.0.node",
       "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
       "nodegit-ubuntu-18-ssl-10.node",
