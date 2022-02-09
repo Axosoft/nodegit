@@ -1,7 +1,7 @@
 {
   "name": "@axosoft/nodegit",
   "description": "Node.js libgit2 asynchronous native bindings",
-  "version": "0.28.0-alpha.11",
+  "version": "0.28.0-alpha.11-gk.2",
   "nodegitVersion": "0.28.0-alpha.11",
   "homepage": "http://nodegit.org",
   "keywords": [
