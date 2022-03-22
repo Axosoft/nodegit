@@ -13,7 +13,7 @@ def runWithNvm = {
 }
 
 try {
-  node("gk-ubuntu16") {
+  node("gk-ubuntu18") {
     stage("Checking out") {
       try {
         sh "git clean -qxdff" // needs to run before deleteDir
