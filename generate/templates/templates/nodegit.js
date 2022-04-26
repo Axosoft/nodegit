@@ -58,6 +58,7 @@ if (process.platform !== "linux") {
   }
   if (isFedora) {
     nativeModuleLoadOrder = [
+      "nodegit-ubuntu-18-ssl-static.node",
       "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-10.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
@@ -65,6 +66,7 @@ if (process.platform !== "linux") {
     ];
   } else if (isCentos) {
     nativeModuleLoadOrder = [
+      "nodegit-ubuntu-18-ssl-static.node",
       "nodegit-ubuntu-18-ssl-1.1.0.node",
       "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-10.node",
@@ -73,6 +75,7 @@ if (process.platform !== "linux") {
     ];
   } else if (isUbuntu) {
     nativeModuleLoadOrder = [
+      "nodegit-ubuntu-18-ssl-static.node",
       "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
       "nodegit-ubuntu-18-ssl-10.node",
@@ -80,6 +83,7 @@ if (process.platform !== "linux") {
     ]
   } else {
     nativeModuleLoadOrder = [
+      "nodegit-ubuntu-18-ssl-static.node",
       "nodegit-ubuntu-18-ssl-1.1.0.node",
       "nodegit-ubuntu-18.node",
       "nodegit-ubuntu-18-ssl-1.0.0.node",
