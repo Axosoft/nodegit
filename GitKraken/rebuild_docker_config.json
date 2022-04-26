@@ -2,6 +2,10 @@
   "ubuntu-18": {
     "image": "docker.axosoft.com/rebuild-nodegit:ubuntu-18"
   },
+  "ubuntu-18-ssl-static": {
+    "image": "docker.axosoft.com/rebuild-nodegit:ubuntu-18",
+    "env": "-e NODEGIT_OPENSSL_STATIC_LINK=1"
+  },
   "ubuntu-18-ssl-1.0.0": {
     "image": "docker.axosoft.com/rebuild-nodegit:ubuntu-18-ssl-1.0.0",
     "patchedDistName": "ubuntu-18-ssl-10"
