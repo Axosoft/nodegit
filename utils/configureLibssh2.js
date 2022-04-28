@@ -28,8 +28,8 @@ module.exports = function retrieveExternalDependencies() {
     let cpArgs = '';
     if (process.env.NODEGIT_OPENSSL_STATIC_LINK === '1') {
       cpArgs = ` --with-libssl-prefix=${opensslVendorDirectory}`;
-    } else if (process.env.openssl_version && process.env.use_custom_openssl) {
-      cpArgs = ` --with-libssl-prefix=/build-openssl/openssl-bin-${process.env.openssl_version}`
+    } else if (process.env.openssl_version_full && process.env.use_custom_openssl) {
+      cpArgs = ` --with-libssl-prefix=/build-openssl/openssl-bin-${process.env.openssl_version_full}`
     }
 
     cp.exec(
