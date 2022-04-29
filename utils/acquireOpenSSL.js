@@ -96,6 +96,13 @@ const buildDarwin = async (buildCwd, macOsDeploymentTarget) => {
 };
 
 const buildLinux = async (buildCwd) => {
+  // We don't want our build system to override these for OpenSSL, otherwise
+  // we get errors about undefined hidden symbols
+  const envVarsToDelete = ['CC', 'CXX', 'CPPFLAGS', 'CXXFLAGS', 'LDFLAGS'];
+  for (const envVarToDelete of envVarsToDelete) {
+    delete process.env[envVarToDelete];
+  }
+  
   const arguments = [
     "linux-x86_64",
     // Electron(at least on centos7) imports the libcups library at runtime, which has a
