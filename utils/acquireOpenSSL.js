@@ -131,9 +131,12 @@ const buildLinux = async (buildCwd) => {
     cwd: buildCwd
   }, { pipeOutput: true });
 
-  await execPromise("make test", {
-    cwd: buildCwd
-  }, { pipeOutput: true });
+  // tests are broken in OpenSSL 1.1.1 after june 1, 2022, until version 1.1.1p because a certificate in the test suite is expired.
+  // because I'm not going to upgrade openssl right now, disable tests until we do
+  // https://github.com/openssl/openssl/issues/15179
+  // await execPromise("make test", {
+  //   cwd: buildCwd
+  // }, { pipeOutput: true });
 
   // only install software, not the docs
   await execPromise("make install_sw", {
