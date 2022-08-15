@@ -3,6 +3,11 @@ var spawn = require("child_process").spawn;
 var path = require("path");
 
 module.exports = function install() {
+  if (process.env.NODEGIT_SKIP_INSTALL) {
+    console.log("[nodegit] Skipping install script");
+    return Promise.resolve();
+  }
+  
   console.log("[nodegit] Running install script");
 
   var nodePreGyp = "node-pre-gyp";

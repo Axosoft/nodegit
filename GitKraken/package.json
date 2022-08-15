@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "rebuildInDocker": "node rebuildInDocker.js"
+    "rebuildInDocker": "node rebuildInDocker.js",
+    "pushOpenSSL": "node pushToS3.js upload-openssl"
   },
   "dependencies": {
     "@electron/get": "^1.13.1",

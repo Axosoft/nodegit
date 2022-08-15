@@ -20,6 +20,11 @@ function printStandardLibError() {
 }
 
 module.exports = function install() {
+  if (process.env.NODEGIT_SKIP_INSTALL) {
+    console.log("[nodegit] Skipping post-install script");
+    return Promise.resolve();
+  }
+
   let returnPromise;
   if (buildFlags.isGitRepo) {
     // If we're building NodeGit from a git repo we aren't going to do any

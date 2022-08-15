@@ -5,6 +5,11 @@ var exec = require(local("../utils/execPromise"));
 var buildFlags = require(local("../utils/buildFlags"));
 
 module.exports = function prepareForBuild() {
+  if (process.env.NODEGIT_SKIP_INSTALL) {
+    console.log("[nodegit] Skipping pre-install script");
+    return Promise.resolve();
+  }
+  
   console.log("[nodegit] Running pre-install script");
 
   return exec("npm -v")
