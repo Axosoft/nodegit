@@ -157,6 +157,30 @@ describe("Revwalk", function() {
       });
   });
 
+  it("can do a first commit walk (revwalk time sorted)", function() {
+    var test = this;
+    var magicSha = "c03723ed33bd62ef2daa3edf04c6c6b0032fbed7";
+
+    return test.walker.firstCommit(1000)
+      .then(function(commitOid) {
+        console.log(commitOid.toString());
+        assert.equal(commitOid.toString(), magicSha);
+      });
+  });
+
+  it("can do a first commit walk (revwalk not sorted)", function() {
+    var test = this;
+    var magicSha = "99c88fd2ac9c5e385bd1fe119d89c83dce326219";
+    var walker = test.repository.createRevWalk(); // do not sort by time
+    walker.push(test.commit.id());
+
+    return walker.firstCommit(1000)
+      .then(function(commitOid) {
+        console.log(commitOid.toString());
+        assert.equal(commitOid.toString(), magicSha);
+      });
+  });
+
   it("can get the history of a file", function() {
     var test = this;
     var magicShas = [
