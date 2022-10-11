@@ -67,7 +67,7 @@ module.exports = function install() {
     if (process.platform === "linux") {
       // Install additional prebuilt binaries from S3
 
-      returnPromise
+      returnPromise = returnPromise
         .then(function() {
           return exec('npm install', { cwd: path.join(rootPath, 'GitKraken') });
         })
