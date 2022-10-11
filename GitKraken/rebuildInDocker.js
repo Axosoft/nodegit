@@ -19,10 +19,11 @@ const buildWithDockerImage = async (distName, dockerImage, patchedDistName, conf
 
   const electronVersion = process.env.GK_ELECTRON_TARGET;
   const envElectronVersion = `-e "GK_ELECTRON_TARGET=${fp.trim(electronVersion)}"`;
+  const envElectronChromiumVersion = `-e ELECTRON_CHROMIUM_VERSION=${fp.trim(process.env.ELECTRON_CHROMIUM_VERSION)}`;
   const envGroupId = `-e "HOST_GROUP_ID=${fp.trim(groupId)}"`;
   const envUserId = `-e HOST_USER_ID=${fp.trim(userId)}`;
   const envUsername = `-e HOST_USERNAME=${fp.trim(username)}`;
-  const environmentVars = `${envElectronVersion} ${envGroupId} ${envUserId} ${envUsername} ${configEnv}`;
+  const environmentVars = `${envElectronVersion} ${envElectronChromiumVersion} ${envGroupId} ${envUserId} ${envUsername} ${configEnv}`;
   const volume = `--volume=${path.resolve(__dirname, "..")}:/nodegit`;
   const nodeGypArch = "--arch=x64";
   const nodeGypTarget = `--target=v${electronVersion}`;
