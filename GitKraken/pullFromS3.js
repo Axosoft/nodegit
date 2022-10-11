@@ -2,6 +2,10 @@ const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
 const got = require("got");
+const stream = require("stream")
+const util = require("util");
+
+const pipeline = util.promisify(stream.pipeline);
 
 const { gitkrakenPrebuilts: { bucketName } } = require('./package.json');
 const { version } = require("../package.json");
@@ -14,13 +18,12 @@ const buildReleaseDir = path.resolve(__dirname, "..", "build", "Release");
 const getBinaryName = (distName, version) => `nodegit-${version}-${distName}.node`;
 const getFriendlyBinaryName = distName => `nodegit-${distName}.node`;
 
-const downloadBinaryFromS3 = binaryName => new Promise((resolve, reject) => {
-  const writeStream = fs.createWriteStream(path.resolve(binaryDir, binaryName))
-  got.stream(`https://${bucketName}.s3.amazonaws.com/${binaryName}`).pipe(writeStream);
-
-  writeStream.on("finish", resolve);
-  writeStream.on("error", reject);
-});
+const downloadBinaryFromS3 = async binaryName => {
+  await pipeline(
+    got.stream(`https://${bucketName}.s3.amazonaws.com/${binaryName}`),
+    fs.createWriteStream(path.resolve(binaryDir, binaryName))
+  )
+};
 
 const downloadAllBinaries = async () => {
   const distNames = getDistNames(rebuildConfig);
