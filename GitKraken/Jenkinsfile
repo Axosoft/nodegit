@@ -4,6 +4,10 @@ if (!env.GK_ELECTRON_TARGET) {
   error 'No electron target specified!'
 }
 
+if (!env.ELECTRON_CHROMIUM_VERSION) {
+  error 'No electron chromium version specified!'
+}
+
 def runWithNvm = {
   command ->
     sh "#!/usr/bin/env bash\n" +
@@ -38,7 +42,9 @@ try {
 
     stage("Build binaries with Docker") {
       dir("GitKraken") {
-        runWithNvm "npm run rebuildInDocker"
+        withEnv(["ELECTRON_CHROMIUM_VERSION=$ELECTRON_CHROMIUM_VERSION"]) {
+          runWithNvm "npm run rebuildInDocker"
+        }
       }
     }
 
