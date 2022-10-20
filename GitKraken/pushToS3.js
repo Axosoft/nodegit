@@ -35,6 +35,7 @@ const uploadOpenSSL = async () => {
   const binaryName = getOpenSSLPackageName();
   const pathToFile = path.join(projectRoot, binaryName);
   await uploadBinaryToS3(binaryName, defaultBucketName, pathToFile);
+  await uploadBinaryToS3(`${binaryName}.sha256`, defaultBucketName, `${pathToFile}.sha256`);
 };
 
 module.exports = {

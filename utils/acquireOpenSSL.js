@@ -28,9 +28,9 @@ const getOpenSSLSourceUrl = (version) => `https://www.openssl.org/source/openssl
 const getOpenSSLSourceSha256Url = (version) => `${getOpenSSLSourceUrl(version)}.sha256`;
 
 class HashVerify extends stream.Transform {
-  constructor(algorithm, expected) {
+  constructor(algorithm, onFinal) {
     super();
-    this.expected = expected;
+    this.onFinal = onFinal;
     this.hash = crypto.createHash(algorithm);
   }
 
@@ -41,10 +41,17 @@ class HashVerify extends stream.Transform {
 
   _final(callback) {
     const digest = this.hash.digest("hex");
-    const digestOk = digest === this.expected;
-    callback(digestOk ? null : new Error(`Digest not OK: ${digest} !== ${this.expected}`));
+    const onFinalResult = this.onFinal(digest);
+    callback(onFinalResult);
   }
 }
+
+const makeHashVerifyOnFinal = (expected) => (digest) => {
+  const digestOk = digest === expected;
+  return digestOk
+    ? null
+    : new Error(`Digest not OK: ${digest} !== ${this.expected}`);
+};
 
 // currently this only needs to be done on linux
 const applyOpenSSLPatches = async (buildCwd, operatingSystem) => {
@@ -272,7 +279,7 @@ const buildOpenSSLIfNecessary = async ({
 
   await pipeline(
     downloadStream,
-    new HashVerify("sha256", openSSLSha256),
+    new HashVerify("sha256", makeHashVerifyOnFinal(openSSLSha256)),
     zlib.createGunzip(),
     tar.extract(extractPath)
   );
@@ -316,7 +323,9 @@ const downloadOpenSSLIfNecessary = async (downloadBinUrl, maybeDownloadSha256) =
 
   const pipelineSteps = [
     downloadStream,
-    maybeDownloadSha256 ? new HashVerify("sha256", maybeDownloadSha256) : null,
+    maybeDownloadSha256
+      ? new HashVerify("sha256", makeHashVerifyOnFinal(maybeDownloadSha256))
+      : null,
     zlib.createGunzip(),
     tar.extract(extractPath)
   ].filter(step => step !== null);
@@ -340,6 +349,11 @@ const getOpenSSLPackageName = () => {
 }
 
 const buildPackage = async () => {
+  let resolve, reject;
+  const promise = new Promise((_resolve, _reject) => {
+    resolve = _resolve;
+    reject = _reject;
+  });
   await pipeline(
     tar.pack(extractPath, {
       entries: pathsToIncludeForPackage,
@@ -352,8 +366,13 @@ const buildPackage = async () => {
       fmode: 0644
     }),
     zlib.createGzip(),
+    new HashVerify("sha256", (digest) => {
+      resolve(digest);
+    }),
     fsNonPromise.createWriteStream(getOpenSSLPackageName())
   );
+  const digest = await promise;
+  await fs.writeFile(`${getOpenSSLPackageName()}.sha256`, digest);
 };
 
 const acquireOpenSSL = async () => {
