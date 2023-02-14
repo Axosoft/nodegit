@@ -8,6 +8,14 @@ if (!env.ELECTRON_CHROMIUM_VERSION) {
   error 'No electron chromium version specified!'
 }
 
+if (!env.GK_CXXFLAGS) {
+  error 'No GK_CXXFLAGS specified!'
+}
+
+if (!env.GK_LDFLAGS) {
+  error 'No GK_LDFLAGS specified!'
+}
+
 def runWithNvm = {
   command ->
     sh "#!/usr/bin/env bash\n" +
@@ -42,7 +50,11 @@ try {
 
     stage("Build binaries with Docker") {
       dir("GitKraken") {
-        withEnv(["ELECTRON_CHROMIUM_VERSION=$ELECTRON_CHROMIUM_VERSION"]) {
+        withEnv([
+          "ELECTRON_CHROMIUM_VERSION=$ELECTRON_CHROMIUM_VERSION",
+          "GK_CXXFLAGS=$GK_CXXFLAGS",
+          "GK_LDFLAGS=$GK_LDFLAGS"
+        ]) {
           runWithNvm "npm run rebuildInDocker"
         }
       }
