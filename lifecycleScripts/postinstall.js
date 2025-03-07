@@ -64,7 +64,7 @@ module.exports = function install() {
       });
   }
 
-    if (process.platform === "linux") {
+    if (process.platform === "linux" && !process.env.GK_SKIP_PREBUILT_DOWNLOAD) {
       // Install additional prebuilt binaries from S3
 
       returnPromise = returnPromise
