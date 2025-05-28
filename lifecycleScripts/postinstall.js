@@ -3,7 +3,6 @@ var path = require("path");
 
 var exec = require("../utils/execPromise");
 var buildFlags = require("../utils/buildFlags");
-const pullFromS3 = require("../GitKraken/pullFromS3");
 
 var rootPath = path.join(__dirname, "..");
 
@@ -71,7 +70,8 @@ module.exports = function install() {
         .then(function() {
           return exec('npm install', { cwd: path.join(rootPath, 'GitKraken') });
         })
-        .then(pullFromS3);
+        .then(() => import("../GitKraken/pullFromS3.mjs"))
+        .then((pullFromS3) => pullFromS3.acquireBinariesFromS3());
     }
     return returnPromise;
 };
