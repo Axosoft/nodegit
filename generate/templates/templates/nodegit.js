@@ -13,93 +13,17 @@ var rawApi;
 // The OS informs this choice.
 // On Windows and MacOS, default to whatever was built.
 // On Linux, we have selected the order based on the most likely OpenSSL distribution you have installed.
-// Fedora 34 =>   OpenSSL 1.1.1
-// Centos 7 =>    OpenSSL 1.0.2
-// Ubuntu 18 =>   OpenSSL 1.1.0-1.1.1
-// Debian 9 =>   OpenSSL 1.1.0
-// NOTE: attempting to load OpenSSL 1.1.0 AFTER attempting to load OpenSSL 1.1.1
-// appears to result in a segfault. This doesn't seem to occur with any other
-// combination of OpenSSL versions.
 var nativeModuleLoadOrder;
 if (process.platform !== "linux") {
   nativeModuleLoadOrder = [
     "nodegit.node"
   ];
 } else {
-  var stdout = '';
-  try {
-    stdout = cp.execSync("cat /etc/os-release").toString();
-  } catch (err) {
-    // ignore
-  }
-  var isFedora = /^ID=fedora$/m.test(stdout);
-  var isCentos = /^ID=centos$/m.test(stdout);
-  var isUbuntu = /^ID=ubuntu$/m.test(stdout);
-  // Check if we can resolve the links in the OpenSSL 1.1.1 version without loading it
-  // to work around the crash issue
-  var ssl111LoadsSuccessfully = false;
-  if (!isFedora && !isUbuntu) {
-    try {
-      var path = require('path');
-      var nodegitPath = path.join(__dirname, '..', 'build', 'Release', 'nodegit-ubuntu-18.node')
-        .replace('app.asar', 'app.asar.unpacked');
-      var lddOutput = cp.execSync(
-        `ldd "${nodegitPath}"`,
-        { env: Object.assign({}, process.env, { LC_ALL: 'C' }) }
-      ).toString();
-      ssl111LoadsSuccessfully = !lddOutput.includes('not found');
-      // Sanity check
-      if (!lddOutput.includes('libssl.so.1.1')) {
-        ssl111LoadsSuccessfully = false;
-      }
-    } catch (err) {
-      // ignore
-    }
-  }
-  if (isFedora) {
-    nativeModuleLoadOrder = [
-      "nodegit-ubuntu-18-ssl-static.node",
-      "nodegit-ubuntu-18.node",
-      "nodegit-ubuntu-18-ssl-10.node",
-      "nodegit-ubuntu-18-ssl-1.0.0.node",
-      "nodegit.node"
-    ];
-  } else if (isCentos) {
-    nativeModuleLoadOrder = [
-      "nodegit-ubuntu-18-ssl-static.node",
-      "nodegit-ubuntu-18-ssl-1.1.0.node",
-      "nodegit-ubuntu-18.node",
-      "nodegit-ubuntu-18-ssl-10.node",
-      "nodegit-ubuntu-18-ssl-1.0.0.node",
-      "nodegit.node"
-    ];
-  } else if (isUbuntu) {
-    nativeModuleLoadOrder = [
-      "nodegit-ubuntu-18-ssl-static.node",
-      "nodegit-ubuntu-18.node",
-      "nodegit-ubuntu-18-ssl-1.0.0.node",
-      "nodegit-ubuntu-18-ssl-10.node",
-      "nodegit.node"
-    ]
-  } else {
-    nativeModuleLoadOrder = [
-      "nodegit-ubuntu-18-ssl-static.node",
-      "nodegit-ubuntu-18-ssl-1.1.0.node",
-      "nodegit-ubuntu-18.node",
-      "nodegit-ubuntu-18-ssl-1.0.0.node",
-      "nodegit-ubuntu-18-ssl-10.node",
-      "nodegit.node"
-    ];
-  }
-
-  if (ssl111LoadsSuccessfully) {
-    nativeModuleLoadOrder.unshift('nodegit-ubuntu-18.node');
-    nativeModuleLoadOrder = nativeModuleLoadOrder
-      // Ensure we don't fall back to 1.1.0 after trying to load 1.1.1 if it fails for some reason, see above.
-      .filter(module => module !== 'nodegit-ubuntu-18-ssl-1.1.0.node');
-    // Remove potential dupe 1.1.1 entries
-    nativeModuleLoadOrder = Array.from(new Set(nativeModuleLoadOrder));
-  }
+  nativeModuleLoadOrder = [
+    "nodegit-ubuntu-20-ssl-static.node",
+    "nodegit-ubuntu-20.node",
+    "nodegit.node"
+  ];
 
   if (process.env.GITKRAKEN_NODEGIT_OPENSSL_LOAD_ORDER) {
     const loadOrderOverrideArr = process.env.GITKRAKEN_NODEGIT_OPENSSL_LOAD_ORDER.split(',');
@@ -131,7 +55,7 @@ for (var nativeModuleName of nativeModuleLoadOrder) {
 }
 
 if (!rawApi) {
-  rawApi = require("build/Debug/nodegit.node");
+  rawApi = require("../build/Debug/nodegit.node");
 }
 
 var promisify = fn => fn && util.promisify(fn); // jshint ignore:line
