@@ -10,7 +10,9 @@ const { getDistNames } = require("./configHelper");
 const binaryDir = path.resolve(__dirname, "additional-binaries");
 const buildReleaseDir = path.resolve(__dirname, "..", "build", "Release");
 
-const getBinaryName = (distName, version) => `nodegit-${version}-${distName}.node`;
+const getBinaryName = (distName, version, arch) => `nodegit-${version}-${arch}-${distName}.node`;
+
+const targetArch = process.env.GK_TARGET_ARCH ?? process.arch;
 
 const buildWithDockerImage = async (distName, dockerImage, patchedDistName, configEnv = '') => {
   const { stdout: groupId } = await exec("id -g");
@@ -18,34 +20,40 @@ const buildWithDockerImage = async (distName, dockerImage, patchedDistName, conf
   const { stdout: username } = await exec("whoami");
 
   const electronVersion = process.env.GK_ELECTRON_TARGET;
-  const envElectronVersion = `-e "GK_ELECTRON_TARGET=${fp.trim(electronVersion)}"`;
-  const envElectronChromiumVersion = `-e ELECTRON_CHROMIUM_VERSION=${fp.trim(process.env.ELECTRON_CHROMIUM_VERSION)}`;
-  const envCxxFlags = `-e GK_CXXFLAGS='${fp.trim(process.env.GK_CXXFLAGS)}'`;
-  const envLdFlags = `-e GK_LDFLAGS='${fp.trim(process.env.GK_LDFLAGS)}'`;
-  const envGroupId = `-e "HOST_GROUP_ID=${fp.trim(groupId)}"`;
-  const envUserId = `-e HOST_USER_ID=${fp.trim(userId)}`;
-  const envUsername = `-e HOST_USERNAME=${fp.trim(username)}`;
-  const environmentVars = `${envElectronVersion} ${envElectronChromiumVersion} ${envCxxFlags} ${envLdFlags} ${envGroupId} ${envUserId} ${envUsername} ${configEnv}`;
-  const volume = `--volume=${path.resolve(__dirname, "..")}:/nodegit`;
-  const nodeGypArch = "--arch=x64";
-  const nodeGypTarget = `--target=v${electronVersion}`;
-  const nodeGypDistUrl = "--dist-url=https://electronjs.org/headers";
-  const nodeGypArguments = `${nodeGypArch} ${nodeGypTarget} ${nodeGypDistUrl}`;
 
+  const envVars = {
+    GK_ELECTRON_TARGET: electronVersion,
+    ELECTRON_CHROMIUM_VERSION: process.env.ELECTRON_CHROMIUM_VERSION,
+    GK_CXXFLAGS: process.env.GK_CXXFLAGS,
+    GK_LDFLAGS: process.env.GK_LDFLAGS,
+    GK_TARGET_ARCH: targetArch,
+    npm_config_arch: targetArch,
+    HOST_GROUP_ID: groupId,
+    HOST_USER_ID: userId,
+    HOST_USERNAME: username,
+  }
+
+  const environmentVariables = Object.entries(envVars)
+    .map(([key, value]) => `-e "${key}=${fp.trim(value)}"`)
+    .join(" ");
+
+  const volume = `--volume=${path.resolve(__dirname, "..")}:/nodegit`;
+
+  console.log(`running docker with ${environmentVariables} ${configEnv} ${volume} ${dockerImage}`);
   await exec(
-    `docker run ${environmentVars} ${volume} ${dockerImage} ${nodeGypArguments}`,
+    `docker run ${environmentVariables} ${configEnv} ${volume} ${dockerImage}`,
     { strict: true }
   );
 
   await fse.copy(
     path.join(buildReleaseDir, "nodegit.node"),
-    path.join(binaryDir, getBinaryName(distName, version))
+    path.join(binaryDir, getBinaryName(distName, version, targetArch))
   );
 
   if (patchedDistName) {
     await fse.copy(
       path.join(buildReleaseDir, "nodegit-patched.node"),
-      path.join(binaryDir, getBinaryName(patchedDistName, version))
+      path.join(binaryDir, getBinaryName(patchedDistName, version, targetArch))
     );
   }
 }
@@ -70,7 +78,7 @@ const pullAllImages = async () => {
 const copyBinaries = async () => {
   const distNames = getDistNames(rebuildConfig);
   for (const distName of distNames) {
-    const binaryName = getBinaryName(distName, version);
+    const binaryName = getBinaryName(distName, version, targetArch);
     await fse.copy(
       path.join(binaryDir, binaryName),
       path.join(buildReleaseDir, binaryName)

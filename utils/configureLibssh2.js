@@ -7,6 +7,26 @@ const libssh2VendorDirectory = path.resolve(__dirname, "..", "vendor", "libssh2"
 const libssh2ConfigureScript = path.join(libssh2VendorDirectory, "configure");
 const libssh2StaticConfigDirectory  = path.resolve(__dirname, "..", "vendor", "static_config", "libssh2");
 
+const convertArch = (archStr) => {
+  const convertedArch = {
+    'ia32': 'x86',
+    'x86': 'x86',
+    'x64': 'x64',
+    'arm64': 'arm64'
+  }[archStr];
+
+  if (!convertedArch) {
+    throw new Error('unsupported architecture');
+  }
+
+  return convertedArch;
+}
+
+const hostArch = convertArch(process.arch);
+const targetArch = process.env.npm_config_arch
+  ? convertArch(process.env.npm_config_arch)
+  : hostArch;
+
 module.exports = function retrieveExternalDependencies() {
   console.info("[nodegit] Configuring libssh2.");
 
@@ -26,10 +46,14 @@ module.exports = function retrieveExternalDependencies() {
     });
 
     let cpArgs = '';
-    if (process.env.NODEGIT_OPENSSL_STATIC_LINK === '1') {
-      cpArgs = ` --with-libssl-prefix=${opensslVendorDirectory}`;
-    } else if (process.env.openssl_version_full && process.env.use_custom_openssl) {
+    if (process.env.openssl_version_full && process.env.use_custom_openssl) {
       cpArgs = ` --with-libssl-prefix=/build-openssl/openssl-bin-${process.env.openssl_version_full}`
+    } else {
+      cpArgs = ` --with-libssl-prefix=${opensslVendorDirectory}`;
+    }
+
+    if (hostArch !== targetArch && targetArch === 'arm64') {
+      cpArgs += ` --host=aarch64-linux-gnu`;
     }
 
     cp.exec(

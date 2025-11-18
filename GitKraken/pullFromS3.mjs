@@ -19,8 +19,8 @@ const pipeline = util.promisify(stream.pipeline);
 const binaryDir = path.resolve(import.meta.dirname, "additional-binaries");
 const buildReleaseDir = path.resolve(import.meta.dirname, "..", "build", "Release");
 
-const getBinaryName = (distName, version) => `nodegit-${version}-${distName}.node`;
-const getFriendlyBinaryName = distName => `nodegit-${distName}.node`;
+const getBinaryName = (distName, version, arch) => `nodegit-${version}-${arch}-${distName}.node`;
+const getFriendlyBinaryName = (distName, arch) => `nodegit-${arch}-${distName}.node`;
 
 const downloadBinaryFromS3 = async binaryName => {
   console.log(`Downloading https://${bucketName}.s3.amazonaws.com/${binaryName}`);
@@ -32,28 +32,32 @@ const downloadBinaryFromS3 = async binaryName => {
 
 const downloadAllBinaries = async () => {
   const distNames = getDistNames(rebuildConfig);
-  for (const distName of distNames) {
-    const binaryName = getBinaryName(distName, version);
-    await downloadBinaryFromS3(binaryName);
+  for (const arch of ['x64', 'arm64']) {
+    for (const distName of distNames) {
+      const binaryName = getBinaryName(distName, version, arch);
+      await downloadBinaryFromS3(binaryName);
+    }
   }
 };
 
 const copyBinaries = async () => {
   const distNames = getDistNames(rebuildConfig);
-  for (const distName of distNames) {
-    const binaryName = getBinaryName(distName, version);
-    const friendlyBinaryName = getFriendlyBinaryName(distName);
+  for (const arch of ['x64', 'arm64']) {
+    for (const distName of distNames) {
+      const binaryName = getBinaryName(distName, version, arch);
+      const friendlyBinaryName = getFriendlyBinaryName(distName, arch);
 
-    await fse.copy(
-      path.resolve(binaryDir, binaryName),
-      path.resolve(buildReleaseDir, friendlyBinaryName)
-    );
+      await fse.copy(
+        path.resolve(binaryDir, binaryName),
+        path.resolve(buildReleaseDir, friendlyBinaryName)
+      );
+    }
   }
 };
 
 const cleanup = async () => {
   await fse.remove(binaryDir);
-  await fse.remove(path.join(__dirname, 'node_modules'));
+  await fse.remove(path.join(import.meta.dirname, 'node_modules'));
 };
 
 export const acquireBinariesFromS3 = async () => {

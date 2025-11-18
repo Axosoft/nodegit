@@ -20,8 +20,8 @@ if (process.platform !== "linux") {
   ];
 } else {
   nativeModuleLoadOrder = [
-    "nodegit-ubuntu-20-ssl-static.node",
-    "nodegit-ubuntu-20.node",
+    `nodegit-${process.arch}-ubuntu-20-ssl-static.node`,
+    `nodegit-${process.arch}-ubuntu-20.node`,
     "nodegit.node"
   ];
 

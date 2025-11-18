@@ -148,13 +148,7 @@ const buildDarwin = async (buildCwd, macOsDeploymentTarget) => {
 };
 
 const buildLinux = async (buildCwd) => {
-  // We don't want our build system to override these for OpenSSL, otherwise
-  // we get errors about undefined hidden symbols
-  const envVarsToDelete = ['CC', 'CXX', 'CPPFLAGS', 'CXXFLAGS', 'LDFLAGS'];
-  for (const envVarToDelete of envVarsToDelete) {
-    delete process.env[envVarToDelete];
-  }
-  
+  // TODO: this can be handled more generically
   const buildConfig = targetArch === "x64" ? "linux-x86_64" : "linux-aarch64";
 
   const configureArgs = [
@@ -165,14 +159,14 @@ const buildLinux = async (buildCwd) => {
     // by the runtime linker.
     // "-fvisibility=hidden",
     // compile static libraries
-    "no-shared",
-    // disable ssl2, ssl3, and compression
-    "no-ssl2",
+    // "no-shared",
+    // disable ssl3, and compression
     "no-ssl3",
     "no-comp",
     // set install directory
     `--prefix="${extractPath}"`,
-    `--openssldir="${extractPath}"`
+    `--openssldir="${extractPath}"`,
+    "--libdir=lib",
   ];
   await execPromise(`./Configure ${configureArgs.join(" ")}`, {
     cwd: buildCwd
@@ -182,12 +176,16 @@ const buildLinux = async (buildCwd) => {
 
   // only build the libraries, not the fuzzer or apps
   await execPromise("make build_libs", {
-    cwd: buildCwd
+    cwd: buildCwd,
+    maxBuffer: 10 * 1024 * 1024
   }, { pipeOutput: true });
 
-  await execPromise("make test", {
-    cwd: buildCwd
-  }, { pipeOutput: true });
+  if (hostArch === targetArch) {
+    await execPromise("make test", {
+      cwd: buildCwd,
+      maxBuffer: 10 * 1024 * 1024
+    }, { pipeOutput: true });
+  }
 
   // only install software, not the docs
   await execPromise("make install_sw", {
@@ -348,11 +346,6 @@ const buildOpenSSLIfNecessary = async ({
     return;
   }
 
-  if (process.platform === "linux" && process.env.NODEGIT_OPENSSL_STATIC_LINK !== "1") {
-    console.log(`Skipping OpenSSL build, NODEGIT_OPENSSL_STATIC_LINK !== 1`);
-    return;
-  }
-
   await removeOpenSSLIfOudated(openSSLVersion);
 
   try {
@@ -400,11 +393,6 @@ const downloadOpenSSLIfNecessary = async ({
 }) => {
   if (process.platform !== "darwin" && process.platform !== "win32" && process.platform !== "linux") {
     console.log(`Skipping OpenSSL download, not required on ${process.platform}`);
-    return;
-  }
-
-  if (process.platform === "linux" && process.env.NODEGIT_OPENSSL_STATIC_LINK !== "1") {
-    console.log(`Skipping OpenSSL download, NODEGIT_OPENSSL_STATIC_LINK !== 1`);
     return;
   }
 

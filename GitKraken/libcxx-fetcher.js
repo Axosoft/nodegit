@@ -48,7 +48,7 @@ async function main() {
   const libcxxObjectsDirPath = process.env.GK_LIBCXX_OBJECTS_DIR;
   const libcxxHeadersDownloadDir = process.env.GK_LIBCXX_HEADERS_DIR;
   const libcxxabiHeadersDownloadDir = process.env.GK_LIBCXXABI_HEADERS_DIR;
-  const arch = process.env.GK_ARCH;
+  const arch = process.env.GK_TARGET_ARCH;
   const electronVersion = process.env.GK_ELECTRON_TARGET;
 
   if (!libcxxObjectsDirPath || !libcxxHeadersDownloadDir || !libcxxabiHeadersDownloadDir) {
