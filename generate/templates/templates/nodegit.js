@@ -1,3 +1,4 @@
+var cp = require("child_process");
 var _ = require("lodash");
 var util = require("util");
 var worker;
@@ -8,17 +9,52 @@ try {
 
 var rawApi;
 
-// Attempt to load the production release first, if it fails fall back to the
-// debug release.
-try {
-  rawApi = require("../build/Release/nodegit.node");
-}
-catch (ex) {
-  /* istanbul ignore next */
-  if (ex.code !== "MODULE_NOT_FOUND") {
-    throw ex;
-  }
+// Declare a preferred load order for built nodegit.node targets
+// The OS informs this choice.
+// On Windows and MacOS, default to whatever was built.
+// On Linux, we have selected the order based on the most likely OpenSSL distribution you have installed.
+var nativeModuleLoadOrder;
+if (process.platform !== "linux") {
+  nativeModuleLoadOrder = [
+    "nodegit.node"
+  ];
+} else {
+  nativeModuleLoadOrder = [
+    `nodegit-${process.arch}-ubuntu-20-ssl-static.node`,
+    `nodegit-${process.arch}-ubuntu-20.node`,
+    "nodegit.node"
+  ];
 
+  if (process.env.GITKRAKEN_NODEGIT_OPENSSL_LOAD_ORDER) {
+    const loadOrderOverrideArr = process.env.GITKRAKEN_NODEGIT_OPENSSL_LOAD_ORDER.split(',');
+
+    const loadOrderOverride = [];
+    for (const override of loadOrderOverrideArr) {
+      if (!nativeModuleLoadOrder.includes(override)) {
+        console.log(`Not overriding ${override}, unknown module`);
+        continue;
+      }
+
+      loadOrderOverride.push(override);
+    }
+
+    nativeModuleLoadOrder = loadOrderOverride;
+    console.log(`Overriding load order to ${nativeModuleLoadOrder}`);
+  }
+}
+
+// Attempt to load the production release first, using the load order determined
+for (var nativeModuleName of nativeModuleLoadOrder) {
+  try {
+    rawApi = require(`../build/Release/${nativeModuleName}`);
+    break;
+  }
+  catch (ex) {
+    // do nothing
+  }
+}
+
+if (!rawApi) {
   rawApi = require("../build/Debug/nodegit.node");
 }
 

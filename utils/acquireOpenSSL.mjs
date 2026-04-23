@@ -130,6 +130,7 @@ const buildDarwin = async (buildCwd, macOsDeploymentTarget) => {
 };
 
 const buildLinux = async (buildCwd) => {
+  // TODO: this can be handled more generically
   const buildConfig = targetArch === "x64" ? "linux-x86_64" : "linux-aarch64";
 
   const configureArgs = [

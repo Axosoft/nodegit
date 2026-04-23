@@ -19,18 +19,17 @@ function printStandardLibError() {
 }
 
 module.exports = function install() {
+  let returnPromise;
   if (buildFlags.isGitRepo) {
     // If we're building NodeGit from a git repo we aren't going to do any
     // cleaning up
-    return Promise.resolve();
-  }
-  if (buildFlags.isElectron || buildFlags.isNWjs) {
+    returnPromise = Promise.resolve();
+  } else if (buildFlags.isElectron || buildFlags.isNWjs) {
     // If we're building for electron or NWjs, we're unable to require the
     // built library so we have to just assume success, unfortunately.
-    return Promise.resolve();
-  }
-
-  return exec("node \"" + path.join(rootPath, "lib/nodegit.js\""))
+    returnPromise = Promise.resolve();
+  } else {
+    returnPromise = exec("node \"" + path.join(rootPath, "lib/nodegit.js\""))
     .catch(function(e) {
       if (~e.toString().indexOf("Module version mismatch")) {
         console.warn(
@@ -58,10 +57,23 @@ module.exports = function install() {
         // fse.removeSync(path.join(rootPath, "src"));
         // fse.removeSync(path.join(rootPath, "include"));
 
-        fse.removeSync(path.join(rootPath, "build/Release/*.a"));
-        fse.removeSync(path.join(rootPath, "build/Release/obj.target"));
-      }
-    });
+          fse.removeSync(path.join(rootPath, "build/Release/*.a"));
+          fse.removeSync(path.join(rootPath, "build/Release/obj.target"));
+        }
+      });
+  }
+
+    if (process.platform === "linux" && !process.env.GK_SKIP_PREBUILT_DOWNLOAD) {
+      // Install additional prebuilt binaries from S3
+
+      returnPromise = returnPromise
+        .then(function() {
+          return exec('npm install', { cwd: path.join(rootPath, 'GitKraken') });
+        })
+        .then(() => import("../GitKraken/pullFromS3.mjs"))
+        .then((pullFromS3) => pullFromS3.acquireBinariesFromS3());
+    }
+    return returnPromise;
 };
 
 // Called on the command line
