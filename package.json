@@ -1,5 +1,5 @@
 {
-  "name": "nodegit",
+  "name": "@axosoft/nodegit",
   "description": "Node.js libgit2 asynchronous native bindings",
   "version": "0.28.0-alpha.38",
   "homepage": "http://nodegit.org",
@@ -78,6 +78,7 @@
     "walk": "^2.3.9"
   },
   "binary": {
+    "package_name": "{module_name}-v0.28.0-alpha.38-{node_abi}-{platform}-{arch}.tar.gz",
     "bucket_name": "axonodegit",
     "module_name": "nodegit",
     "module_path": "./build/Release/",
